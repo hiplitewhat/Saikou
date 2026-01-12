@@ -43,7 +43,7 @@ Saikou is crafted based on simplistic yet state-of-the-art elegance. It is an [A
 |                      SITE                      |   STATUS    | DIRECT DOWNLOADS |
 | :--------------------------------------------: | :---------: | :--------------: |
 |        [AllAnime](https://allanime.to)         |   WORKING   |       SOME       |
-|           [Zoro](https://hianime.to)           |   WORKING   |        NO        |
+|           [H!Anime](https://hianime.to)           |   WORKING   |        NO        |
 |       [AnimePahe](https://animepahe.ru)        |   WORKING   |        NO        |
 |         [AnimeKai](https://anikai.to)          |   WORKING   |        NO        |
 |           [Kaido](https://kaido.to)            |   WORKING   |        NO        |
