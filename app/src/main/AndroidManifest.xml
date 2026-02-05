@@ -133,7 +133,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="ani.saikou.connections.discord.Login"
+        <activity android:name="ani.saikou.connections.discord.auth.Login"
             android:configChanges="orientation|screenSize|layoutDirection"
             android:excludeFromRecents="true"
             android:exported="true"

@@ -24,8 +24,8 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import ani.saikou.*
 import ani.saikou.connections.anilist.Anilist
-import ani.saikou.connections.discord.Discord
-import ani.saikou.connections.discord.RPC
+//import ani.saikou.connections.discord.Discord
+//import ani.saikou.connections.discord.RPC
 import ani.saikou.connections.updateProgress
 import ani.saikou.databinding.ActivityMangaReaderBinding
 import ani.saikou.media.Media
@@ -80,7 +80,7 @@ class MangaReaderActivity : AppCompatActivity() {
     var sliding = false
     var isAnimating = false
 
-    private var rpc : RPC? = null
+//    private var rpc : RPC? = null
 
     override fun onAttachedToWindow() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && !settings.showSystemBars) {
@@ -106,7 +106,7 @@ class MangaReaderActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        rpc?.close()
+//        rpc?.close()
         super.onDestroy()
     }
 
@@ -252,20 +252,20 @@ class MangaReaderActivity : AppCompatActivity() {
                 binding.mangaReaderNextChap.text = chaptersTitleArr.getOrNull(currentChapterIndex + 1) ?: ""
                 binding.mangaReaderPrevChap.text = chaptersTitleArr.getOrNull(currentChapterIndex - 1) ?: ""
                 applySettings()
-                rpc?.close()
-                rpc = Discord.defaultRPC()
-                rpc?.send {
-                    type = RPC.Type.WATCHING
-                    activityName = media.userPreferredName
-                    details =  chap.title?.takeIf { it.isNotEmpty() } ?: getString(R.string.chapter_num, chap.number)
-                    state = "Chapter : ${chap.number}/${media.manga?.totalChapters ?: "??"}"
-                    media.cover?.let { cover ->
-                        largeImage = RPC.Link(media.userPreferredName, cover)
-                    }
-                    media.shareLink?.let { link ->
-                        buttons.add(0, RPC.Link(getString(R.string.view_manga), link))
-                    }
-                }
+//                rpc?.close()
+
+//                rpc?.send {
+//                    type = RPC.Type.WATCHING
+//                    activityName = media.userPreferredName
+//                    details =  chap.title?.takeIf { it.isNotEmpty() } ?: getString(R.string.chapter_num, chap.number)
+//                    state = "Chapter : ${chap.number}/${media.manga?.totalChapters ?: "??"}"
+//                    media.cover?.let { cover ->
+//                        largeImage = RPC.Link(media.userPreferredName, cover)
+//                    }
+//                    media.shareLink?.let { link ->
+//                        buttons.add(0, RPC.Link(getString(R.string.view_manga), link))
+//                    }
+//                }
             }
         }
 

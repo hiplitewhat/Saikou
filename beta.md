@@ -1,27 +1,14 @@
 ## Version 1.2.5-beta
 
-### New Features
-
-- **Animekai**
-    - Added **Animekai** provider.
-
----
 
 ### Bug Fixes.
 
-- **Trailers**
-    - Fixed issue with youtube embed showing error 153
+- **Discord**
+    - Fixed login and rich presence for anime (use at your own risk)
     
-- **AllAnime, Kaido, H!Anime**
-    - Fixed issues affecting source resolution and playback.
+- **Subtitles**
+    - Bump exoplayer version to fix decoding(showing binary data when playing Mu Shen Ji).
 
-- **Animepahe**
-    - Some enhancements.
 
-### Enhancements
 
-- **Mapping & Matching**
-    - Improved the core mapping logic — the app now selects the correct anime in most cases.
-- **Episode Metadata**
-    - Episode descriptions, thumbnails, and official titles are now displayed consisently across
-      providers
+   

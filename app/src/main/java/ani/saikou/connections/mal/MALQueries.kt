@@ -1,5 +1,6 @@
 package ani.saikou.connections.mal
 
+import android.annotation.SuppressLint
 import ani.saikou.connections.anilist.api.FuzzyDate
 import ani.saikou.client
 import ani.saikou.tryWithSuspend
@@ -12,6 +13,7 @@ class MALQueries {
             return mapOf("Authorization" to "Bearer ${MAL.token ?: return null}")
         }
 
+    @SuppressLint("UnsafeOptInUsageError")
     @Serializable
     data class MalUser(
         val id: Int,

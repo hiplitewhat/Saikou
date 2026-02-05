@@ -312,7 +312,7 @@
 
                     <ImageView
                         android:layout_width="32dp"
-                        android:layout_height="match_parent"
+                        android:layout_height="64dp"
                         android:layout_marginEnd="16dp"
                         android:src="@drawable/ic_discord"
                         app:tint="@color/bg_opp"
@@ -332,8 +332,6 @@
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="-4dp"
                             android:fontFamily="@font/poppins_bold"
-                            android:gravity="center"
-                            android:maxLines="1"
                             android:text="@string/username"
                             android:textSize="16sp" />
 
@@ -349,7 +347,6 @@
                             android:text="@string/logout"
                             android:textColor="?attr/colorSecondaryVariant"
                             android:textSize="14sp" />
-
                     </LinearLayout>
 
                     <com.google.android.material.card.MaterialCardView
@@ -366,10 +363,34 @@
                             android:layout_height="52dp"
                             android:scaleType="center"
                             app:srcCompat="@drawable/ic_round_person_24"
-                            tools:ignore="ContentDescription,ImageContrastCheck" />
-
+                            tools:ignore="ContentDescription" />
                     </com.google.android.material.card.MaterialCardView>
+                </LinearLayout>
 
+                <LinearLayout
+                    android:id="@+id/settingsDiscordRPCContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/settingsDiscordRPCText"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:fontFamily="@font/poppins_bold"
+                        android:text="Enable Discord RPC"
+                        android:textColor="@color/bg_opp"
+                        android:textSize="14sp" />
+
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/settingsDiscordRPCSwitch"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="true"
+                        app:thumbTint="@color/button_switch_track"
+                        tools:ignore="UseSwitchCompat" />
                 </LinearLayout>
 
                 <TextView
@@ -663,8 +684,8 @@
                     style="@style/Widget.Material3.Button.TextButton"
                     android:layout_width="match_parent"
                     android:layout_height="64dp"
-                    android:layout_marginTop="8dp"
                     android:layout_marginStart="-12dp"
+                    android:layout_marginTop="8dp"
                     android:fontFamily="@font/poppins_bold"
                     android:insetTop="0dp"
                     android:insetBottom="0dp"
@@ -1187,11 +1208,11 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingTop="16dp"
-                android:paddingBottom="16dp"
                 android:clipToPadding="false"
                 android:gravity="center"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:paddingTop="16dp"
+                android:paddingBottom="16dp">
 
                 <ImageView
                     android:id="@+id/settingBuyMeCoffee"

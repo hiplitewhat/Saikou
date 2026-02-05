@@ -321,7 +321,7 @@
     </androidx.cardview.widget.CardView>
 
     <com.google.android.material.progressindicator.CircularProgressIndicator
-        android:id="@id/exo_buffering"
+        android:id="@+id/exo_buffering"
         android:layout_width="72dp"
         android:layout_height="72dp"
         android:layout_gravity="center"

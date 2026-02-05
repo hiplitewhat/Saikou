@@ -6,7 +6,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import ani.saikou.R
-import ani.saikou.connections.discord.Discord
+//import ani.saikou.connections.discord.Discord
 import ani.saikou.loadData
 import ani.saikou.connections.mal.MAL
 import ani.saikou.media.Media
@@ -18,12 +18,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 suspend fun getUserId(context: Context, block: () -> Unit) {
-    CoroutineScope(Dispatchers.IO).launch {
-        if (Discord.userid == null && Discord.token != null) {
-            if (!Discord.getUserData())
-                snackString(context.getString(R.string.error_loading_discord_user_data))
-        }
-    }
+//    CoroutineScope(Dispatchers.IO).launch {
+////        if (Discord.userid == null && Discord.token != null) {
+////            if (!Discord.getUserData())
+////                snackString(context.getString(R.string.error_loading_discord_user_data))
+////        }
+//    }
 
     val anilist = if (Anilist.userid == null && Anilist.token != null) {
         if (Anilist.query.getUserData()) {
@@ -77,7 +77,7 @@ class AnilistHomeViewModel : ViewModel() {
     suspend fun loadMain(context: FragmentActivity) {
         Anilist.getSavedToken(context)
         MAL.getSavedToken(context)
-        Discord.getSavedToken(context)
+//        Discord.getSavedToken(context)
         if (loadData<Boolean>("check_update") != false) AppUpdater.check(context)
         genres.postValue(Anilist.query.getGenresAndTags(context))
     }

@@ -13,7 +13,7 @@ def gitCommitHash = providers.exec {
 }.standardOutput.asText.get().trim()
 
 android {
-    compileSdk 34
+    compileSdk 36
 
     defaultConfig {
         applicationId "ani.saikou"
@@ -37,6 +37,7 @@ android {
     }
     buildFeatures {
         viewBinding true
+        buildConfig = true
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
@@ -62,7 +63,7 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
     implementation 'com.github.Blatzar:NiceHttp:0.4.11'
-    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0'
+    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3'
 
 //    Glide
     implementation 'com.github.bumptech.glide:glide:4.16.0'
@@ -76,7 +77,7 @@ dependencies {
     //implementation 'com.google.firebase:firebase-crashlytics-ktx:18.4.1'
 
 //    Exoplayer
-    ext.exo_version = '1.2.0'
+    ext.exo_version = '1.5.1'
     implementation "androidx.media3:media3-exoplayer:$exo_version"
     implementation "androidx.media3:media3-ui:$exo_version"
     implementation "androidx.media3:media3-exoplayer-hls:$exo_version"
@@ -92,4 +93,8 @@ dependencies {
     implementation 'com.davemorrissey.labs:subsampling-scale-image-view-androidx:3.10.0'
     implementation 'com.alexvasilkov:gesture-views:2.8.3'
     implementation 'com.github.VipulOG:ebook-reader:0.1.6'
+
+/// Lifecycle view model
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7")
+
 }

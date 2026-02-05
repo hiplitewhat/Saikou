@@ -92,8 +92,7 @@ import ani.saikou.R
 import ani.saikou.brightnessConverter
 import ani.saikou.circularReveal
 import ani.saikou.connections.anilist.Anilist
-import ani.saikou.connections.discord.Discord
-import ani.saikou.connections.discord.RPC
+import ani.saikou.connections.discord.WebSocketRPC
 import ani.saikou.connections.updateProgress
 import ani.saikou.databinding.ActivityExoplayerBinding
 import ani.saikou.defaultHeaders
@@ -146,9 +145,6 @@ import kotlin.math.roundToInt
 class ExoplayerView : AppCompatActivity(), Player.Listener {
     private lateinit var finalMediaSource: MergingMediaSource // or com.google.android.exoplayer2.source.MergingMediaSource
     private var audioLanguages = mutableListOf<Pair<String, String>>()
-    private lateinit var exoAudioTrack: ImageButton
-
-
     private val resumeWindow = "resumeWindow"
     private val resumePosition = "resumePosition"
     private val playerFullscreen = "playerFullscreen"
@@ -236,7 +232,37 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
 
     var rotation = 0
 
-    private var rpc: RPC? = null
+
+    private lateinit var discordRPC: WebSocketRPC
+    private fun buildRPCConfig(): WebSocketRPC.RPCConfig {
+        if (!::episode.isInitialized ) {
+
+            return WebSocketRPC.RPCConfig(
+                title = "Saikou",
+                episode = "?",
+                episodeTitle = null,
+                totalEpisodes = null,
+                coverUrl = null,
+                shareLink = null
+            )
+        }
+
+        val epNumber = episode.number
+        val epTitle = episode.title?.takeIf { it.isNotBlank() && it != "null" }
+
+
+        return WebSocketRPC.RPCConfig(
+            title = media.userPreferredName ?: media.nameRomaji?:media.name ?: "Unknown Anime",
+            episode = epNumber,
+            episodeTitle = epTitle,
+            totalEpisodes = media.anime?.totalEpisodes?.toString(),
+            coverUrl = media.banner ?: media.cover,
+            shareLink = media.shareLink ?: "https://anilist.co/anime/${media.id}",
+            episodeThumbnail = episode.thumb?.url
+        )
+    }
+
+
 
 
     // Add in onCreate: exoAudioTrack = playerView.findViewById(R.id.exo_audio)
@@ -375,6 +401,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         binding = ActivityExoplayerBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -425,6 +452,9 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         episodeTitle = playerView.findViewById(R.id.exo_ep_sel)
 
         playerView.controllerShowTimeoutMs = 5000
+
+        discordRPC = WebSocketRPC(this)
+        discordRPC.connect()
 
         val audioManager = applicationContext.getSystemService(AUDIO_SERVICE) as AudioManager
 
@@ -478,6 +508,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         //BackButton
         playerView.findViewById<ImageButton>(R.id.exo_back).setOnClickListener {
             onBackPressedDispatcher.onBackPressed()
+            discordRPC.onPlaybackChanged(false,exoPlayer.currentPosition)
         }
 
         //TimeStamps
@@ -518,10 +549,13 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
                 (exoPlay.drawable as Animatable?)?.start()
                 if (isPlayerPlaying) {
                     Glide.with(this).load(R.drawable.anim_play_to_pause).into(exoPlay)
+
                     exoPlayer.pause()
+
                 } else {
                     Glide.with(this).load(R.drawable.anim_pause_to_play).into(exoPlay)
                     exoPlayer.play()
+
                 }
             }
         }
@@ -985,6 +1019,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         //Episode Change
         fun change(index: Int) {
             if (isInitialized) {
+
                 changingServer = false
                 saveData(
                     "${media.id}_${episodeArr[currentEpisodeIndex]}",
@@ -998,6 +1033,8 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
                 model.setMedia(media)
                 model.epChanged.postValue(false)
                 model.setEpisode(episodes[media.anime!!.selectedEpisode!!]!!, "change")
+
+
                 model.onEpisodeClick(
                     media, media.anime!!.selectedEpisode!!, this.supportFragmentManager,
                     false,
@@ -1044,26 +1081,17 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
                 model.setMedia(media)
                 currentEpisodeIndex = episodeArr.indexOf(ep.number)
                 episodeTitle.setSelection(currentEpisodeIndex)
+
                 if (isInitialized) releasePlayer()
                 playbackPosition = loadData("${media.id}_${ep.number}", this) ?: 0
+
+                discordRPC.updateEpisode(
+                    config = buildRPCConfig(),
+                    isCurrentlyPlaying = false
+                )
                 initPlayer()
                 preloading = false
-                rpc = Discord.defaultRPC()
-                rpc?.send {
-                    type = RPC.Type.WATCHING
-                    activityName = media.userPreferredName
-                    details = ep.title?.takeIf { it.isNotEmpty() } ?: getString(
-                        R.string.episode_num,
-                        ep.number
-                    )
-                    state = "Episode : ${ep.number}/${media.anime?.totalEpisodes ?: "??"}"
-                    media.cover?.let { cover ->
-                        largeImage = RPC.Link(media.userPreferredName, cover)
-                    }
-                    media.shareLink?.let { link ->
-                        buttons.add(0, RPC.Link(getString(R.string.view_anime), link))
-                    }
-                }
+
                 updateProgress()
             }
         }
@@ -1397,16 +1425,13 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
 
         // Resume dialog
         if (playbackPosition != 0L && !changingServer && !settings.alwaysContinue) {
-            val time = String.format(
-                "%02d:%02d:%02d",
-                TimeUnit.MILLISECONDS.toHours(playbackPosition),
-                TimeUnit.MILLISECONDS.toMinutes(playbackPosition) - TimeUnit.HOURS.toMinutes(
-                    TimeUnit.MILLISECONDS.toHours(playbackPosition)
-                ),
-                TimeUnit.MILLISECONDS.toSeconds(playbackPosition) - TimeUnit.MINUTES.toSeconds(
-                    TimeUnit.MILLISECONDS.toMinutes(playbackPosition)
-                )
-            )
+
+            val hours = TimeUnit.MILLISECONDS.toHours(playbackPosition)
+            val minutes = TimeUnit.MILLISECONDS.toMinutes(playbackPosition) % 60
+            val seconds = TimeUnit.MILLISECONDS.toSeconds(playbackPosition) % 60
+
+            val time = String.format("%02d:%02d:%02d", hours, minutes, seconds)
+
             AlertDialog.Builder(this, R.style.DialogTheme)
                 .setTitle(getString(R.string.continue_from, time))
                 .setCancelable(false)
@@ -1424,6 +1449,9 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
             buildExoplayer(finalMediaSource)
         }
     }
+
+
+
 
     private fun buildExoplayer(finalMediaSource: MediaSource) {
 
@@ -1454,7 +1482,6 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
 
                 prepare()
 
-                // Adjust resume position if near the end
                 loadData<Long>("${media.id}_${media.anime!!.selectedEpisode}_max")?.let { duration ->
                     if (duration <= playbackPosition) {
                         playbackPosition = max(0, duration - 5)
@@ -1480,9 +1507,10 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         isPlayerPlaying = exoPlayer.playWhenReady
         playbackPosition = exoPlayer.currentPosition
         exoPlayer.release()
+        discordRPC.onPlaybackChanged(isPlayerPlaying,playbackPosition)
         VideoCache.release()
         mediaSession?.release()
-        rpc?.close()
+
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -1501,6 +1529,8 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         media.selected!!.server = null
         saveData("${media.id}_${media.anime!!.selectedEpisode}", exoPlayer.currentPosition, this)
         model.saveSelected(media.id, media.selected!!, this)
+
+
         model.onEpisodeClick(
             media, episode.number, this.supportFragmentManager,
             launch = false
@@ -1524,6 +1554,8 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
                 this
             )
         }
+
+
     }
 
     override fun onResume() {
@@ -1534,11 +1566,14 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
             playerView.onResume()
             playerView.useController = true
         }
+
+
     }
 
     override fun onStop() {
         playerView.player?.pause()
         super.onStop()
+
     }
 
     private var wasPlaying = false
@@ -1555,10 +1590,14 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
     }
 
     override fun onIsPlayingChanged(isPlaying: Boolean) {
+        val currentPos = exoPlayer.currentPosition
         if (!isBuffering) {
             isPlayerPlaying = isPlaying
             playerView.keepScreenOn = isPlaying
             (exoPlay.drawable as Animatable?)?.start()
+
+            discordRPC.onPlaybackChanged(isPlaying, currentPos)
+
             if (!this.isDestroyed) Glide.with(this)
                 .load(if (isPlaying) R.drawable.anim_play_to_pause else R.drawable.anim_pause_to_play)
                 .into(exoPlay)
@@ -1567,6 +1606,11 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
 
     override fun onRenderedFirstFrame() {
         super.onRenderedFirstFrame()
+        val dur = exoPlayer.duration
+        val currentPos = exoPlayer.currentPosition
+
+        discordRPC.onDurationReady(buildRPCConfig(), dur, currentPos)
+
         saveData("${media.id}_${media.anime!!.selectedEpisode}_max", exoPlayer.duration, this)
         val height = (exoPlayer.videoFormat ?: return).height
         val width = (exoPlayer.videoFormat ?: return).width
@@ -1690,13 +1734,21 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
             if (episodeLength == 0f) {
                 episodeLength = exoPlayer.duration.toFloat()
             }
+
+//            if (exoPlayer.isPlaying && !isBuffering) {
+//
+//            }
         }
+
         isBuffering = playbackState == Player.STATE_BUFFERING
+
         if (playbackState == Player.STATE_ENDED && settings.autoPlay) {
             if (interacted) exoNext.performClick()
             else toast(getString(R.string.autoplay_cancelled))
         }
+
         super.onPlaybackStateChanged(playbackState)
+
     }
 
     private fun updateAniProgress() {
@@ -1734,7 +1786,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
 
     override fun onDestroy() {
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
-
+        discordRPC.close()
         CoroutineScope(Dispatchers.IO).launch {
             tryWithSuspend(true) {
                 extractor?.onVideoStopped(video)

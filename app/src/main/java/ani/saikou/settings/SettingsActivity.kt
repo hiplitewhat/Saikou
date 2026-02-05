@@ -16,10 +16,14 @@ import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.updateLayoutParams
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import ani.saikou.*
 import ani.saikou.connections.anilist.Anilist
-import ani.saikou.connections.discord.Discord
+import ani.saikou.connections.discord.auth.DiscordViewModel
+import ani.saikou.connections.discord.auth.DiscordRepository
+import ani.saikou.connections.discord.rpc.RpcRepository
 import ani.saikou.connections.mal.MAL
 import ani.saikou.databinding.ActivitySettingsBinding
 import ani.saikou.others.AppUpdater
@@ -34,20 +38,26 @@ import ani.saikou.subcriptions.Subscription.Companion.timeMinutes
 import io.noties.markwon.Markwon
 import io.noties.markwon.SoftBreakAddsNewLinePlugin
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
+
 import kotlinx.coroutines.launch
-import kotlin.random.Random
+
 
 
 class SettingsActivity : AppCompatActivity() {
     private val restartMainActivity = object : OnBackPressedCallback(false) {
         override fun handleOnBackPressed() = startMainActivity(this@SettingsActivity)
     }
+    private lateinit var viewModel: DiscordViewModel
     lateinit var binding: ActivitySettingsBinding
 
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val discord = DiscordRepository(this)
+        val rpc = RpcRepository(this)
+        viewModel = DiscordViewModel(discord,rpc)
+
         binding = ActivitySettingsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -475,54 +485,80 @@ OS Version: $CODENAME $RELEASE ($SDK_INT)
                 binding.settingsMALUsername.visibility = View.GONE
             }
 
-            if (Discord.token != null) {
-                if (Discord.avatar != null) {
-                    binding.settingsDiscordAvatar.loadImage(Discord.avatar)
-                }
-                binding.settingsDiscordUsername.visibility = View.VISIBLE
-                binding.settingsDiscordUsername.text = Discord.userid ?: Discord.token?.replace(Regex("."),"*")
-                binding.settingsDiscordLogin.setText(R.string.logout)
-                binding.settingsDiscordLogin.setOnClickListener {
-                    Discord.removeSavedToken(this)
-                    restartMainActivity.isEnabled = true
-                    reload()
-                }
-            } else {
-                binding.settingsDiscordAvatar.setImageResource(R.drawable.ic_round_person_24)
-                binding.settingsDiscordUsername.visibility = View.GONE
-                binding.settingsDiscordLogin.setText(R.string.login)
-                binding.settingsDiscordLogin.setOnClickListener {
-                    Discord.warning(this).show(supportFragmentManager, "dialog")
-                }
-            }
         }
         reload()
 
-        lifecycleScope.launch(Dispatchers.IO) {
-            delay(2000)
-            runOnUiThread {
-                if (Random.nextInt(0, 100) > 69) {
-                    CustomBottomDialog.newInstance().apply {
-                        title = "Enjoying the App?"
-                        addView(TextView(this@SettingsActivity).apply {
-                            text =
-                                "Consider donating!\nOnce we reach the goal of $1000 (60%+ already reached!), Get ready to get an Offline Player & Manga Downloads!"
-                        })
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.uiState.collect { state ->
+                    if (state.isLoggedIn) {
+                        binding.settingsDiscordUsername.visibility = View.VISIBLE
+                        binding.settingsDiscordUsername.text = state.username
+                        binding.settingsDiscordAvatar.loadImage(state.avatarUrl)
 
-                        setNegativeButton("no moners :(") {
-                            snackString("That's alright, you'll be a rich man soon :prayge:")
-                            dismiss()
+                        binding.settingsDiscordLogin.text = getString(R.string.logout)
+                        binding.settingsDiscordLogin.setOnClickListener {
+                            viewModel.logout()
                         }
 
-                        setPositiveButton("denote :)") {
-                            if (binding.settingUPI.visibility == View.VISIBLE) binding.settingUPI.performClick()
-                            else binding.settingBuyMeCoffee.performClick()
-                            dismiss()
+                        binding.settingsDiscordRPCSwitch.apply {
+                            isChecked = state.isRpcEnabled
+                            setOnCheckedChangeListener { _, isChecked ->
+                                viewModel.setRpcEnabled(isChecked)
+                            }
+                            visibility = View.VISIBLE
                         }
-                        show(supportFragmentManager, "dialog")
+
+                        binding.settingsDiscordRPCText.visibility = View.VISIBLE
+                    } else {
+                        binding.settingsDiscordUsername.visibility = View.GONE
+                        binding.settingsDiscordAvatar.setImageResource(R.drawable.ic_round_person_24)
+                        binding.settingsDiscordLogin.text = getString(R.string.login)
+                        binding.settingsDiscordLogin.setOnClickListener {
+                            DiscordRepository(this@SettingsActivity)
+                                .warning(this@SettingsActivity)
+                                .show(supportFragmentManager, "discord_warning")
+                        }
+
+                        binding.settingsDiscordRPCSwitch.visibility = View.GONE
+                        binding.settingsDiscordRPCText.visibility = View.GONE
                     }
                 }
             }
         }
+
+
+
+//
+//        lifecycleScope.launch(Dispatchers.IO) {
+//            delay(2000)
+//            runOnUiThread {
+//                if (Random.nextInt(0, 100) > 69) {
+//                    CustomBottomDialog.newInstance().apply {
+//                        title = "Enjoying the App?"
+//                        addView(TextView(this@SettingsActivity).apply {
+//                            text =
+//                                "Consider donating!\nOnce we reach the goal of $1000 (60%+ already reached!), Get ready to get an Offline Player & Manga Downloads!"
+//                        })
+//
+//                        setNegativeButton("no moners :(") {
+//                            snackString("That's alright, you'll be a rich man soon :prayge:")
+//                            dismiss()
+//                        }
+//
+//                        setPositiveButton("denote :)") {
+//                            if (binding.settingUPI.visibility == View.VISIBLE) binding.settingUPI.performClick()
+//                            else binding.settingBuyMeCoffee.performClick()
+//                            dismiss()
+//                        }
+//                        show(supportFragmentManager, "dialog")
+//                    }
+//                }
+//            }
+//        }
+    }
+    override fun onResume() {
+        super.onResume()
+        viewModel.loadDiscordUser()
     }
 }

@@ -1,5 +1,6 @@
 package ani.saikou.connections.mal
 
+import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.net.Uri
@@ -88,6 +89,7 @@ object MAL {
         saveData(MAL_TOKEN, res)
     }
 
+    @SuppressLint("UnsafeOptInUsageError")
     @Serializable
     data class ResponseToken(
         @SerialName("token_type") val tokenType: String,

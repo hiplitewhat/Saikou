@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="exo_error_message_background_color">#AA000000</color>
     <color name="pink_200">#FF5DAE</color>
     <color name="pink_500">#FF007F</color>
     <color name="pink_500_25">#40FF007F</color>

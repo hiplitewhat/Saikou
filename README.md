@@ -1,8 +1,7 @@
 # **Saikou**
 
 <p align="center">
-   <a href="https://discord.gg/2T7TunuwFZ"><img src="https://img.shields.io/badge/Discord-7289DA?style=for-the-badge&logo=discord&logoColor=white"></a>
-   <a href="https://telegram.me/saikou_app" ><img src="https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white"></a> 
+   <a href="https://discord.gg/2T7TunuwFZ"><img src="https://img.shields.io/badge/Discord-7289DA?style=for-the-badge&logo=discord&logoColor=white"></a> 
    <a href="https://github.com/middlegear/Saikou/releases"><img src="https://img.shields.io/github/downloads/middlegear/Saikou/total?color=%233DDC84&logo=android&logoColor=%23fff&style=for-the-badge"></a>
 </p>
 
@@ -12,15 +11,9 @@ Saikou is crafted based on simplistic yet state-of-the-art elegance. It is an [A
 </i>
 <br>
 
-<br>
-
-### 🌟STAR THIS REPOSITORY TO SUPPORT THE DEVELOPER AND ENCOURAGE THE DEVELOPMENT OF THE APPLICATION!
-
 > **Warning**
 >
 > Please do not attempt to upload Saikou or any of it's forks on Playstore or any other Android appstores on the internet. Doing so, may infringe their terms and conditions. This may result to legal action or immediate take-down of the app.
-
-<!--<img src="https://github.com/saikou-app/saikou-app.github.io/blob/main/assets/Screenshot_20220330-175525.png?raw=true" style="width: 23%;margin:16px;" />&nbsp;&nbsp;<img src="https://github.com/saikou-app/saikou-app.github.io/blob/main/assets/Screenshot_20220330-175542.png?raw=true" style="width: 23%;margin:16px;" />&nbsp;&nbsp;<img src="https://github.com/saikou-app/saikou-app.github.io/blob/main/assets/Screenshot_20220330-175551.png?raw=true" style="width: 23%;margin:16px;" />&nbsp;&nbsp;<img src="https://github.com/saikou-app/saikou-app.github.io/blob/main/assets/Screenshot_20220330-175600.png?raw=true" style="width: 23%;margin:16px;" />&nbsp;&nbsp;<img src="https://github.com/saikou-app/saikou-app.github.io/blob/main/assets/Screenshot_20220330-183102.png?raw=true" style="width: 23%;margin:16px;" />&nbsp;&nbsp;<img src="https://github.com/saikou-app/saikou-app.github.io/blob/main/assets/Screenshot_20220330-183112.png?raw=true" style="width: 23%;margin:16px;" />&nbsp;&nbsp;<img src="https://github.com/saikou-app/saikou-app.github.io/blob/main/assets/Screenshot_20220330-183120.png?raw=true" style="width: 23%;margin:16px;" />&nbsp;&nbsp;<img src="https://github.com/saikou-app/saikou-app.github.io/blob/main/assets/Screenshot_20220330-182352.png?raw=true" style="width: 23%;margin:16px;" />&nbsp;&nbsp;<img src="https://github.com/saikou-app/saikou-app.github.io/blob/main/assets/Screenshot_20220330-182421.png?raw=true" style="width: 23%;margin:16px;" />-->
 
 ## APP FEATURES
 
@@ -28,54 +21,14 @@ Saikou is crafted based on simplistic yet state-of-the-art elegance. It is an [A
 
 - A completely open source app with a nice UI & Animations :)
 
-- The most Efficient scraping for anime and manga from multiple sources. (_Spoiler Alert : No web-views were harmed_)
-
-- Synchronize anime and manga real-time with AniList and MyAnimeList. Easily categorise anime and manga based on your current status. (Powered by AniList)
-
-- Find all shows using thoroughly and frequently updated list of all trending, popular and ongoing anime based on scores.
-
-- View extensive details about anime shows, movies and manga titles. It also features ability to countdown to the next episode of airing anime. (Powered by AniList & MyAnimeList)
-
-- Get notified when new episodes/chapters are released!
-
-* **Available Anime sources:-**
-
-|                      SITE                      |   STATUS    | DIRECT DOWNLOADS |
-| :--------------------------------------------: | :---------: | :--------------: |
-|        [AllAnime](https://allanime.to)         |   WORKING   |       SOME       |
-|           [H!Anime](https://hianime.to)           |   WORKING   |        NO        |
-|       [AnimePahe](https://animepahe.ru)        |   WORKING   |        NO        |
-|         [AnimeKai](https://anikai.to)          |   WORKING   |        NO        |
-|           [Kaido](https://kaido.to)            |   WORKING   |        NO        |
-|         [Haho (18+)](https://haho.moe)         |   WORKING   |       YES        |
-|   [HentaiMama (18+)](https://hentaimama.io)    |   WORKING   |       SOME       |
-| [HentaiStream (18+)](https://hentaistream.com) | NOT-WORKING |       YES        |
-|     [HentaiFF (18+)](https://hentaiff.com)     |   WORKING   |       SOME       |
-
-- **Available Manga sources:-**
-
-|                   SITE                    |    STATUS    |
-| :---------------------------------------: | :----------: |
-|   [MangaBuddy](https://mangabuddy.com)    |   WORKING    |
-|    [MangaPill](https://mangapill.com)     |   WORKING    |
-|     [MangaDex](https://mangadex.org)      |   WORKING    |
-|  [MangaReaderTo](https://mangareader.to)  | LOOKS BUSTED |
-|      [Comickfun](https://comick.fun)      |    BUSTED    |
-|   [Manga4Life](https://manga4life.com/)   |    BUSTED    |
-|  [MangaRead](https://www.mangaread.org)   |   WORKING    |
-|  [MangaKatana](https://mangakatana.com)   |   WORKING    |
-| [ColoredManga](https://coloredmanga.com/) |   WORKING    |
-|      [Toonily](https://toonily.com/)      |   WORKING    |
-|   [NHentai (18+)](https://nhentai.net)    |   WORKING    |
-|   [Manwha18 (18+)](https://manhwa18.cc)   |   WORKING    |
-
 ## Planned Stuff
 
-- User Profile
+- TV support
+- Multi Quality Download (M3U8 & DASH videos)
 
-- Offline Video Player & Reader
+- Bulk Download
 
-- Add novel sources (1lib.in)?? Dk
+- Novel Reader
 
 ## Rejected Stuff
 
@@ -86,15 +39,6 @@ Saikou is crafted based on simplistic yet state-of-the-art elegance. It is an [A
 - Comment Section
 
 - Accent Color Change (Hot Pink Supremacy.)
-
-## Help wanted for:
-
-- TV support
-- Multi Quality Download (M3U8 & DASH videos)
-
-- Bulk Download
-
-- Novel Reader
 
 ## WANT TO CONTRIBUTE?
 
@@ -109,14 +53,6 @@ Saikou is crafted based on simplistic yet state-of-the-art elegance. It is an [A
   <img src="https://invidget.switchblade.xyz/2T7TunuwFZ">
  </a>
 </p>
-
-### Official Telegram Group
-
-https://telegram.me/saikou_app
-
-### VISIT FOR MORE INFORMATION:-
-
-https://saikou.me/
 
 ## DISCLAIMER
 
