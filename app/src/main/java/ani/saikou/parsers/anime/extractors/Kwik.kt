@@ -45,7 +45,7 @@ class Kwik(override val server: VideoServer) : VideoExtractor() {
     )
 
     override suspend fun extract(): VideoContainer {
-        try {
+        return tryWithSuspend(post = false, snackbar = false) {
             val response = client.get(server.embed.url)
                 .parsed<SourceResponse>()
 
@@ -64,7 +64,6 @@ class Kwik(override val server: VideoServer) : VideoExtractor() {
                 "Sec-Fetch-Mode" to "cors",
                 "Sec-Fetch-Site" to "cross-site",
                 "TE" to "trailers",
-
                 )
 
 
@@ -77,22 +76,19 @@ class Kwik(override val server: VideoServer) : VideoExtractor() {
 
                 specificHeaders["Host"] = host
 
-                val numericString = Regex("\\d+").find(sourceItem.quality.toString())?.value
+                val numericString = Regex("\\d+").find(sourceItem.quality)?.value
 
                 val finalNumber = numericString?.toIntOrNull()
                 Video(
                     quality = finalNumber,
                     format = VideoType.CONTAINER,
-                    file = FileUrl(sourceItem.url,baseHeaders),
+                    file = FileUrl(sourceItem.url, baseHeaders),
                     extraNote = sourceItem.quality
                 )
             }
 
+            VideoContainer(videos)
 
-
-            return VideoContainer(videos)
-        } catch (e: Exception) {
-            return VideoContainer(emptyList())
-        }
+        } ?: VideoContainer(emptyList())
     }
 }

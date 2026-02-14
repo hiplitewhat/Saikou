@@ -2,11 +2,13 @@
 
 package ani.saikou.connections.anilist.api
 
+import android.annotation.SuppressLint
 import ani.saikou.R
 import ani.saikou.currContext
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+@SuppressLint("UnsafeOptInUsageError")
 @Serializable
 data class Media(
     // The id of the media
@@ -176,6 +178,7 @@ data class Media(
     @SerialName("modNotes") var modNotes: String?,
 )
 
+@SuppressLint("UnsafeOptInUsageError")
 @Serializable
 data class MediaTitle(
     // The romanization of the native language title

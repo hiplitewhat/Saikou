@@ -2,18 +2,16 @@ package ani.saikou.parsers.anime.extractors
 
 import ani.saikou.FileUrl
 import ani.saikou.client
-import ani.saikou.logError
 import ani.saikou.parsers.Subtitle
-import ani.saikou.parsers.SubtitleType
 import ani.saikou.parsers.Video
 import ani.saikou.parsers.VideoContainer
 import ani.saikou.parsers.VideoExtractor
 import ani.saikou.parsers.VideoServer
 import ani.saikou.parsers.VideoType
+import ani.saikou.tryWithSuspend
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import java.net.URL
 
 @OptIn(InternalSerializationApi::class)
 class MegaCloud(override val server: VideoServer) : VideoExtractor() {
@@ -49,18 +47,16 @@ class MegaCloud(override val server: VideoServer) : VideoExtractor() {
     @Serializable
     data class Headers(
         @SerialName("Referer")
-        val referer: String?=null
+        val referer: String? = null
     )
 
     override suspend fun extract(): VideoContainer {
-        try {
+        return tryWithSuspend(post = false, snackbar = true) {
             val response = client.get(server.embed.url)
                 .parsed<SourceResponse>()
 
-            val videoReferer = response.headers.referer
-            if (videoReferer.isNullOrEmpty() || response.data.sources.isEmpty()) {
-                return VideoContainer(emptyList())
-            }
+            val videoReferer = response.headers.referer.toString()
+
 
             val origin = videoReferer.removeSuffix("/")
 
@@ -93,11 +89,9 @@ class MegaCloud(override val server: VideoServer) : VideoExtractor() {
                     url = sub.url
                 )
             }
+            VideoContainer(videos, subs)
 
-            return VideoContainer(videos, subs)
-        } catch (e: Exception) {
-            logError(e = e, post = true, snackbar = true)
-            return VideoContainer(emptyList())
-        }
+        } ?: VideoContainer(emptyList())
+
     }
 }

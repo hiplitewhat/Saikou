@@ -11,7 +11,9 @@ import kotlinx.serialization.Serializable
 @OptIn(InternalSerializationApi::class)
 abstract class DirectApiParser : AnimeParser() {
 
-    open val apiUrl: String = "https://kenjitsu.vercel.app"
+    override val hostUrl: String = "https://kenjitsu.vercel.app"
+
+    open val apiKey:String = "testing testing"
     abstract val providerName: String
 
 
@@ -22,11 +24,10 @@ abstract class DirectApiParser : AnimeParser() {
 
         return tryWithSuspend(post = false, snackbar = false) {
             if (anilistId <= 0) return@tryWithSuspend emptyList()
-            val url = "$apiUrl/api/anilist/episodes/$anilistId?provider=$providerName"
-            val res = client.get(url).parsed<ApiResponse>()
+            val url = "$hostUrl/api/anilist/episodes/$anilistId?provider=$providerName"
+            val res = client.get(url, headers = mapOf("x-api-key" to apiKey)).parsed<ApiResponse>()
 
             val episodesList = res.providerEpisodes
-
 
             if (episodesList.isEmpty()) {
                 setUserText("Failed to fetch episodes for $anilistId")

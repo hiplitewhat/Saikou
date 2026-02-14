@@ -19,37 +19,39 @@ class AllAnime : DirectApiParser() {
     override val name = "AllAnime"
     override val providerName = "allanime"
     override val saveName = "AllAnime"
-    override val hostUrl = "https://kenjitsu.vercel.app"
+
     override val isDubAvailableSeparately = false
 
     override suspend fun search(query: String): List<ShowResponse> {
-        return try {
-            if (query.isBlank()) return emptyList()
+        return tryWithSuspend(post = false, true) {
+            if (query.isBlank()) return@tryWithSuspend emptyList()
 
-            val res = client.get("$hostUrl/api/allanime/anime/search?q=$query")
-                .parsed<SearchApiResponse>()
+            val res = client.get(
+                "$hostUrl/api/allanime/anime/search?q=$query",
+                headers = mapOf("x-api-key" to apiKey)
+            ).parsed<SearchApiResponse>()
 
             res.data.map {
-                val title = it.name?:it.romaji?:"N/A"
+                val title = it.name ?: it.romaji ?: "N/A"
                 ShowResponse(
-                    name =title,
+                    name = title,
                     link = it.id,
                     coverUrl = FileUrl(it.posterImage)
                 )
             }
-        } catch (e: Exception) {
-            emptyList()
-        }
+        } ?: emptyList()
     }
+
 
     override suspend fun loadEpisodes(
         animeLink: String,
         extra: Map<String, String>?
     ): List<Episode> {
-        return try {
-            if (animeLink.isBlank()) return emptyList()
+        return tryWithSuspend(post = false, snackbar = true) {
+            if (animeLink.isBlank()) return@tryWithSuspend emptyList()
             val url = "$hostUrl/api/allanime/anime/$animeLink/episodes"
-            val res = client.get(url).parsed<EpisodesResponse>()
+            val res =
+                client.get(url, headers = mapOf("x-api-key" to apiKey)).parsed<EpisodesResponse>()
 
             res.data.map { ep ->
                 Episode(
@@ -58,9 +60,8 @@ class AllAnime : DirectApiParser() {
                     title = ep.title ?: "Episode ${ep.episodeNumber}",
                 )
             }
-        } catch (e: Exception) {
-            emptyList()
-        }
+
+        } ?: emptyList()
     }
 
 
@@ -88,11 +89,14 @@ class AllAnime : DirectApiParser() {
         version: String,
         hostUrl: String
     ): List<VideoServer> {
-        return try {
+        return tryWithSuspend(post = false, snackbar = true) {
             val label = if (version == "dub") "Dub" else "Sub"
 
             val res =
-                client.get("$hostUrl/api/allanime/episode/$episodeLink/servers?version=$version")
+                client.get(
+                    "$hostUrl/api/allanime/episode/$episodeLink/servers?version=$version",
+                    headers = mapOf("x-api-key" to apiKey)
+                )
                     .parsed<EpisodeServersResponse>()
 
             res.data.map { item ->
@@ -104,9 +108,8 @@ class AllAnime : DirectApiParser() {
                     embed = FileUrl(sourceUrl)
                 )
             }
-        } catch (e: Exception) {
-            emptyList()
-        }
+        } ?: emptyList()
+
     }
 
     override suspend fun getVideoExtractor(server: VideoServer): VideoExtractor? {
@@ -129,8 +132,8 @@ class AllAnime : DirectApiParser() {
     @Serializable
     private data class SearchItems(
         val id: String,
-        val romaji:String?=null,
-        val name: String?=null,
+        val romaji: String? = null,
+        val name: String? = null,
         val posterImage: String
     )
 

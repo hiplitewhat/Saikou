@@ -44,14 +44,12 @@ class AllAnimeExtractor(override val server: VideoServer) : VideoExtractor() {
     )
 
     override suspend fun extract(): VideoContainer {
-        try {
+        return tryWithSuspend(post = false, snackbar = false) {
             val response = client.get(server.embed.url)
                 .parsed<SourceResponse>()
-
             val videos = response.data.sources.map {
 
                 Video(
-
                     quality = null,
                     format = VideoType.M3U8,
                     file = FileUrl(it.url),
@@ -67,11 +65,10 @@ class AllAnimeExtractor(override val server: VideoServer) : VideoExtractor() {
                     url = sub.url
                 )
             }
+            VideoContainer(videos, subs)
 
-            return VideoContainer(videos, subs)
+        } ?: VideoContainer(emptyList())
 
-        } catch (e: Exception) {
-            return VideoContainer(emptyList())
-        }
     }
+
 }

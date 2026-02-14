@@ -13,6 +13,7 @@ abstract class VideoExtractor : Serializable {
     var videos: List<Video> = listOf()
     var subtitles: List<Subtitle> = listOf()
 
+
     /** Separate audio tracks shared by all videos from this extractor (e.g. Bilibili .m4s) */
     var audioTracks: List<AudioTrack> = listOf()
 
@@ -70,7 +71,12 @@ data class AudioTrack(
     /** Optional headers required for this audio URL */
     val headers: Map<String, String>? = null
 ) : Serializable {
-    constructor(url: String, bitrate:String? = null, language: String? = null, note: String? = null)
+    constructor(
+        url: String,
+        bitrate: String? = null,
+        language: String? = null,
+        note: String? = null
+    )
             : this(url, bitrate, language, note, null)
 }
 
@@ -137,7 +143,13 @@ data class Video(
     val extraNote: String? = null,
 ) : Serializable {
 
-    constructor(quality: Int? = null, videoType: VideoType, url: String, size: Double?, extraNote: String? = null)
+    constructor(
+        quality: Int? = null,
+        videoType: VideoType,
+        url: String,
+        size: Double?,
+        extraNote: String? = null
+    )
             : this(quality, videoType, FileUrl(url), size, extraNote)
 
     constructor(quality: Int? = null, videoType: VideoType, url: String, size: Double?)

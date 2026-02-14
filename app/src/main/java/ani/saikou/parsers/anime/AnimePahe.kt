@@ -2,41 +2,34 @@ package ani.saikou.parsers.anime
 
 import ani.saikou.FileUrl
 import ani.saikou.client
-import ani.saikou.loadData
-import ani.saikou.parsers.AnimeParser
+
 import ani.saikou.parsers.DirectApiParser
 import ani.saikou.parsers.Episode
 import ani.saikou.parsers.ShowResponse
-import ani.saikou.parsers.Video
-import ani.saikou.parsers.VideoContainer
 import ani.saikou.parsers.VideoExtractor
 import ani.saikou.parsers.VideoServer
-import ani.saikou.parsers.VideoType
 import ani.saikou.parsers.anime.extractors.Kwik
+import ani.saikou.tryWithSuspend
 import kotlinx.serialization.InternalSerializationApi
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import java.net.URLEncoder
-import kotlin.math.absoluteValue
-import kotlin.math.pow
+import kotlin.collections.mapOf
 
+@OptIn(InternalSerializationApi::class)
 class AnimePahe : DirectApiParser() {
 
     override val name = "AnimePahe"
     override val saveName = "animepahe"
     override val providerName = "animepahe"
-
-    override val hostUrl = "https://kenjitsu.vercel.app"
     override val isDubAvailableSeparately = false
 
 
     override suspend fun search(query: String): List<ShowResponse> {
-        return try {
-            if (query.isBlank()) return emptyList()
-
-            val encoded = URLEncoder.encode(query, "utf-8")
-            val res = client.get("$hostUrl/api/animepahe/anime/search?q=$encoded")
-                .parsed<SearchApiResponse>()
+        return tryWithSuspend(post = false, snackbar = true) {
+            if (query.isBlank()) return@tryWithSuspend emptyList()
+            val res = client.get(
+                "$hostUrl/api/animepahe/anime/search?q=$query",
+                headers = mapOf("x-api-key" to apiKey)
+            ).parsed<SearchApiResponse>()
 
             res.data.map {
                 ShowResponse(
@@ -45,9 +38,8 @@ class AnimePahe : DirectApiParser() {
                     coverUrl = FileUrl(it.posterImage)
                 )
             }
-        } catch (e: Exception) {
-            emptyList()
-        }
+
+        } ?: emptyList()
     }
 
 
@@ -55,10 +47,10 @@ class AnimePahe : DirectApiParser() {
         animeLink: String,
         extra: Map<String, String>?
     ): List<Episode> {
-        return try {
+        return tryWithSuspend(post = false, snackbar = true) {
             val url = "$hostUrl/api/animepahe/anime/$animeLink"
-            val res = client.get(url).parsed<EpisodesResponse>()
-
+            val res =
+                client.get(url, headers = mapOf("x-api-key" to apiKey)).parsed<EpisodesResponse>()
             res.providerEpisodes.map { ep ->
                 Episode(
                     number = ep.episodeNumber.toString(),
@@ -68,18 +60,19 @@ class AnimePahe : DirectApiParser() {
 
                 )
             }
-        } catch (e: Exception) {
-            emptyList()
-        }
+
+        } ?: emptyList()
     }
 
     override suspend fun loadVideoServers(
         episodeLink: String,
         extra: Map<String, String>?
     ): List<VideoServer> {
-        return try {
-            val res = client.get("$hostUrl/api/animepahe/episode/$episodeLink/servers")
-                .parsed<EpisodeServersResponse>()
+        return tryWithSuspend(post = false, snackbar = true) {
+            val res = client.get(
+                "$hostUrl/api/animepahe/episode/$episodeLink/servers",
+                headers = mapOf("x-api-key" to apiKey)
+            ).parsed<EpisodeServersResponse>()
 
             val allServers = mutableListOf<VideoServer>()
 
@@ -98,14 +91,11 @@ class AnimePahe : DirectApiParser() {
             }
 
             allServers
-        } catch (e: Exception) {
-            emptyList()
-        }
+        } ?: emptyList()
     }
 
     @OptIn(InternalSerializationApi::class)
-    override suspend fun getVideoExtractor(server: VideoServer): VideoExtractor? {
-
+    override suspend fun getVideoExtractor(server: VideoServer): VideoExtractor {
         return Kwik(server)
     }
 

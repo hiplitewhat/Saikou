@@ -53,7 +53,7 @@ class InternalAK(override val server: VideoServer) : VideoExtractor() {
     )
 
     override suspend fun extract(): VideoContainer {
-        try {
+        return tryWithSuspend(post = false, snackbar = false) {
             val response = client.get(server.embed.url)
                 .parsed<SourceResponse>()
 
@@ -85,11 +85,9 @@ class InternalAK(override val server: VideoServer) : VideoExtractor() {
                     note = track.type
                 )
             }
-
-            return VideoContainer(videos, subs, tracks)
-        } catch (e: Exception) {
-            return VideoContainer(emptyList())
+            VideoContainer(videos, subs, tracks)
         }
-
+            ?: VideoContainer(emptyList())
     }
+
 }

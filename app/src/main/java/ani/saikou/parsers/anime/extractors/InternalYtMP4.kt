@@ -44,7 +44,7 @@ class InternalYtMP4(override val server: VideoServer) : VideoExtractor() {
     )
 
     override suspend fun extract(): VideoContainer {
-        try {
+        return tryWithSuspend(post = false, snackbar = false) {
             val response = client.get(server.embed.url)
                 .parsed<SourceResponse>()
 
@@ -65,7 +65,6 @@ class InternalYtMP4(override val server: VideoServer) : VideoExtractor() {
             val videos = response.data.sources.map {
 
                 Video(
-
                     quality = null,
                     format = VideoType.CONTAINER,
                     file = FileUrl(it.url, baseHeaders),
@@ -73,10 +72,8 @@ class InternalYtMP4(override val server: VideoServer) : VideoExtractor() {
                 )
             }
 
-            return VideoContainer(videos)
-        } catch (e: Exception) {
+            VideoContainer(videos)
 
-            return VideoContainer(emptyList())
-        }
+        } ?: VideoContainer(emptyList())
     }
 }

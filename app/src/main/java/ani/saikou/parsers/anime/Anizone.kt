@@ -17,7 +17,6 @@ import java.net.URLEncoder
 //    override val name = "Anizone"
 //    override val saveName = "Anizone"
 //    override val providerName = "anizone"
-//    override val hostUrl = "https://kenjitsu.vercel.app"
 //    override val isDubAvailableSeparately = false
 //
 //

@@ -15,13 +15,12 @@ import kotlinx.serialization.Serializable
 class AllManga : MangaParser() {
     override val name = "AllManga"
     override val saveName = "AllManga"
-    override val hostUrl = "https://kenjitsu.vercel.app"
 
     private val posterImageReferer: String = "https://allmanga.to/"
 
 
     override suspend fun search(query: String): List<ShowResponse> {
-        return tryWithSuspend(post = true, snackbar = true) {
+        return tryWithSuspend(post = false, snackbar = true) {
             if (query.isEmpty()) return@tryWithSuspend emptyList()
             val response =
                 client.get("$hostUrl/api/allmanga/manga/search?q=$query").parsed<SearchResponse>()
@@ -43,7 +42,7 @@ class AllManga : MangaParser() {
         mangaLink: String,
         extra: Map<String, String>?
     ): List<MangaChapter> {
-        return tryWithSuspend(post = false, false) {
+        return tryWithSuspend(post = false, true) {
             if (mangaLink.isEmpty()) return@tryWithSuspend emptyList()
             val response = client.get("$hostUrl/api/allmanga/manga/${mangaLink}/chapters")
                 .parsed<ChapterResponse>()
@@ -58,8 +57,16 @@ class AllManga : MangaParser() {
         } ?: emptyList()
     }
 
+    private val imageUrlCache = mutableMapOf<String, List<MangaImage>>()
+
     override suspend fun loadImages(chapterLink: String): List<MangaImage> {
-        return tryWithSuspend(post = true, snackbar = false) {
+        if (chapterLink.isEmpty()) return emptyList()
+
+        imageUrlCache[chapterLink]?.let {
+            return it
+        }
+
+        return tryWithSuspend(post = false, snackbar = true) {
             if (chapterLink.isEmpty()) return@tryWithSuspend emptyList()
             val response = client.get("$hostUrl/api/allmanga/sources/$chapterLink")
                 .parsed<ChapterImageResponse>()
@@ -73,11 +80,13 @@ class AllManga : MangaParser() {
                 "Accept-Encoding" to "gzip, deflate, br, zstd",
                 "Referer" to referer,
             )
-            response.data.map {
+          val urls=  response.data.map {
                 MangaImage(
                     url = FileUrl(it.url, baseHeaders)
                 )
             }
+            imageUrlCache[chapterLink]= urls
+            urls
         } ?: emptyList()
     }
 

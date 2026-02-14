@@ -19,7 +19,6 @@ class Hianime : DirectApiParser() {
     override val name = "hianime"
     override val saveName = "hianime"
     override val providerName = "hianime"
-    override val hostUrl = "https://kenjitsu.vercel.app"
     override val isDubAvailableSeparately = false
 
 
@@ -28,7 +27,10 @@ class Hianime : DirectApiParser() {
             if (query.isBlank()) return@tryWithSuspend emptyList()
 
             val encoded = URLEncoder.encode(query, "utf-8")
-            val res = client.get("$hostUrl/api/hianime/anime/search?q=$encoded")
+            val res = client.get(
+                "$hostUrl/api/hianime/anime/search?q=$encoded",
+                headers = mapOf("x-api-key" to apiKey)
+            )
                 .parsed<SearchApiResponse>()
 
             res.data.map {
@@ -50,7 +52,8 @@ class Hianime : DirectApiParser() {
             if (animeLink.isBlank()) return@tryWithSuspend emptyList()
 
             val url = "$hostUrl/api/hianime/anime/$animeLink"
-            val res = client.get(url).parsed<EpisodesResponse>()
+            val res =
+                client.get(url, headers = mapOf("x-api-key" to apiKey)).parsed<EpisodesResponse>()
 
             res.providerEpisodes.map { ep ->
                 Episode(
@@ -67,13 +70,12 @@ class Hianime : DirectApiParser() {
         episodeLink: String,
         extra: Map<String, String>?
     ): List<VideoServer> {
-        return tryWithSuspend(post = true, snackbar = true) {
-
-
+        return tryWithSuspend(post = false, snackbar = true) {
             if (episodeLink.isBlank()) return@tryWithSuspend emptyList()
-
-            val res = client.get("$hostUrl/api/hianime/episode/$episodeLink/servers")
-                .parsed<EpisodeServersResponse>()
+            val res = client.get(
+                "$hostUrl/api/hianime/episode/$episodeLink/servers",
+                headers = mapOf("x-api-key" to apiKey)
+            ).parsed<EpisodeServersResponse>()
 
             val allServers = mutableListOf<VideoServer>()
 
@@ -99,7 +101,7 @@ class Hianime : DirectApiParser() {
     }
 
 
-    override suspend fun getVideoExtractor(server: VideoServer): VideoExtractor? {
+    override suspend fun getVideoExtractor(server: VideoServer): VideoExtractor {
 
         return MegaCloud(server)
     }

@@ -3,14 +3,13 @@ package ani.saikou.parsers
 import ani.saikou.Lazier
 import ani.saikou.lazyList
 import ani.saikou.parsers.anime.AllAnime
-
+import ani.saikou.parsers.anime.Animekai
 import ani.saikou.parsers.anime.AnimePahe
-
 import ani.saikou.parsers.anime.Haho
 import ani.saikou.parsers.anime.HentaiFF
 import ani.saikou.parsers.anime.HentaiMama
 import ani.saikou.parsers.anime.HentaiStream
-import ani.saikou.parsers.anime.Animekai
+
 //import ani.saikou.parsers.anime.Anizone
 import ani.saikou.parsers.anime.Hianime
 import ani.saikou.parsers.anime.Kaido
@@ -20,7 +19,7 @@ object AnimeSources : WatchSources() {
         "H!Anime" to ::Hianime,
         "AnimePahe" to ::AnimePahe,
         "Animekai" to ::Animekai,
-        "Kaido" to ::Kaido,
+//        "Kaido" to ::Kaido,
         "AllAnime" to ::AllAnime,
 //        "Anizone" to ::Anizone, 
     )

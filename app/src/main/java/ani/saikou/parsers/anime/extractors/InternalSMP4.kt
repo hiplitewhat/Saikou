@@ -8,6 +8,7 @@ import ani.saikou.parsers.VideoContainer
 import ani.saikou.parsers.VideoExtractor
 import ani.saikou.parsers.VideoServer
 import ani.saikou.parsers.VideoType
+import ani.saikou.tryWithSuspend
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.Serializable
 
@@ -32,34 +33,25 @@ class InternalSMP4(override val server: VideoServer) : VideoExtractor() {
 
     @Serializable
     data class SourceResponse(
-        val headers: Headers,
         val data: SourceData
     )
 
-    @Serializable
-    data class Headers(
-        val Referer: String
-    )
-
     override suspend fun extract(): VideoContainer {
-        try {
-            val response = client.get(server.embed.url)
+        return tryWithSuspend(post = false, snackbar = false) {
+            val response = client.get(server.embed.url, headers = mapOf("x-api-key" to "sup"))
                 .parsed<SourceResponse>()
-
 
             val videos = response.data.sources.map {
                 Video(
-
                     quality = null,
                     format = VideoType.CONTAINER,
                     file = FileUrl(it.url),
                     extraNote = it.type
                 )
             }
-            return VideoContainer(videos)
-        } catch (e: Exception) {
-            return VideoContainer(emptyList())
-        }
+            VideoContainer(videos)
+
+        } ?: VideoContainer(emptyList())
 
     }
 }
