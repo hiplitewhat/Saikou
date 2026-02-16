@@ -1,6 +1,7 @@
 package ani.saikou.parsers
 
 
+import ani.saikou.BuildConfig
 import ani.saikou.media.Media
 import ani.saikou.client
 
@@ -13,7 +14,10 @@ abstract class MangaApiParser : MangaParser() {
 
     override val hostUrl: String = "https://kenjitsu.vercel.app"
     abstract val providerName: String
-    open val apiKey: String = ""
+
+
+    open val  apiKey:String=BuildConfig.MY_CUSTOM_API_KEY
+
 
     private val providerCache = mutableMapOf<String, ShowResponse>()
     override suspend fun autoSearch(mediaObj: Media): ShowResponse? {

@@ -22,7 +22,10 @@ class Comix : MangaApiParser() {
         return tryWithSuspend(post = false, snackbar = true) {
             if (query.isEmpty()) return@tryWithSuspend emptyList()
             val response =
-                client.get("$hostUrl/api/comix/manga/search?q=$query").parsed<SearchApiResponse>()
+                client.get(
+                    "$hostUrl/api/comix/manga/search?q=$query",
+                    headers = mapOf("x-api-key" to apiKey)
+                ).parsed<SearchApiResponse>()
             response.data.map {
                 ShowResponse(
                     name = it.name,
@@ -39,7 +42,10 @@ class Comix : MangaApiParser() {
     ): List<MangaChapter> {
         return tryWithSuspend(post = false, snackbar = true) {
             if (mangaLink.isEmpty()) return@tryWithSuspend emptyList()
-            val response = client.get("$hostUrl/api/comix/manga/$mangaLink/chapters")
+            val response = client.get(
+                "$hostUrl/api/comix/manga/$mangaLink/chapters",
+                headers = mapOf("x-api-key" to apiKey)
+            )
                 .parsed<ChaptersApiResponse>()
             response.data.map {
                 MangaChapter(
@@ -52,6 +58,7 @@ class Comix : MangaApiParser() {
             }
         } ?: emptyList()
     }
+
     private val imageUrlCache = mutableMapOf<String, List<MangaImage>>()
 
     override suspend fun loadImages(chapterLink: String): List<MangaImage> {
@@ -60,7 +67,10 @@ class Comix : MangaApiParser() {
         imageUrlCache[chapterLink]?.let { return it }
 
         return tryWithSuspend(post = false, snackbar = true) {
-            val response = client.get("$hostUrl/api/comix/sources/$chapterLink")
+            val response = client.get(
+                "$hostUrl/api/comix/sources/$chapterLink",
+                headers = mapOf("x-api-key" to apiKey)
+            )
                 .parsed<ChapterImageResponse>()
 
             val images = response.data.map {

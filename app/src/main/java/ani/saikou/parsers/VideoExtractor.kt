@@ -1,5 +1,6 @@
 package ani.saikou.parsers
 
+import ani.saikou.BuildConfig
 import ani.saikou.FileUrl
 import java.io.Serializable
 
@@ -12,6 +13,10 @@ abstract class VideoExtractor : Serializable {
     abstract val server: VideoServer
     var videos: List<Video> = listOf()
     var subtitles: List<Subtitle> = listOf()
+
+
+    // can be removed i did this for locking down
+    open val  apiKey:String=BuildConfig.MY_CUSTOM_API_KEY
 
 
     /** Separate audio tracks shared by all videos from this extractor (e.g. Bilibili .m4s) */

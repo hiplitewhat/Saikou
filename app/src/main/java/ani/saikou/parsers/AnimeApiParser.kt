@@ -1,5 +1,6 @@
 package ani.saikou.parsers
 
+import ani.saikou.BuildConfig
 import ani.saikou.FileUrl
 import ani.saikou.client
 import ani.saikou.media.Media
@@ -13,7 +14,7 @@ abstract class AnimeApiParser : AnimeParser() {
 
     override val hostUrl: String = "https://kenjitsu.vercel.app"
 
-    open val apiKey: String = "testing testing"
+    open val apiKey: String = BuildConfig.MY_CUSTOM_API_KEY
     abstract val providerName: String
 
 

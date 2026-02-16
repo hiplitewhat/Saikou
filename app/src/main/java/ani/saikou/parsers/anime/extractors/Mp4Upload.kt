@@ -43,7 +43,7 @@ class Mp4Upload(override val server: VideoServer) : VideoExtractor() {
     override suspend fun extract(): VideoContainer {
 
         try {
-            val response = client.get(server.embed.url)
+            val response = client.get(server.embed.url,headers = mapOf("x-api-key" to apiKey))
                 .parsed<SourceResponse>()
 
             val videoReferer = response.headers.referer

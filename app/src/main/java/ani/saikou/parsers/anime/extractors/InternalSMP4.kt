@@ -38,7 +38,7 @@ class InternalSMP4(override val server: VideoServer) : VideoExtractor() {
 
     override suspend fun extract(): VideoContainer {
         return tryWithSuspend(post = false, snackbar = false) {
-            val response = client.get(server.embed.url, headers = mapOf("x-api-key" to "sup"))
+            val response = client.get(server.embed.url, headers = mapOf("x-api-key" to apiKey))
                 .parsed<SourceResponse>()
 
             val videos = response.data.sources.map {

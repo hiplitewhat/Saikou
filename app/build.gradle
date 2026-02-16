@@ -1,3 +1,4 @@
+
 plugins {
     id 'com.android.application'
     id 'com.google.gms.google-services'
@@ -11,6 +12,7 @@ plugins {
 def gitCommitHash = providers.exec {
     commandLine("git", "rev-parse", "--verify", "--short", "HEAD")
 }.standardOutput.asText.get().trim()
+
 
 android {
     compileSdk 36
@@ -29,6 +31,7 @@ android {
             applicationIdSuffix ".beta"
             debuggable true
             versionNameSuffix "." + gitCommitHash
+            buildConfigField "String", "MY_CUSTOM_API_KEY", "\"${project.findProperty('API_KEY')}\""
         }
         release {
             debuggable false

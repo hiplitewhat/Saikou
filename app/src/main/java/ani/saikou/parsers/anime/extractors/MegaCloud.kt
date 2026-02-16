@@ -52,7 +52,7 @@ class MegaCloud(override val server: VideoServer) : VideoExtractor() {
 
     override suspend fun extract(): VideoContainer {
         return tryWithSuspend(post = false, snackbar = true) {
-            val response = client.get(server.embed.url)
+            val response = client.get(server.embed.url,headers = mapOf("x-api-key" to apiKey))
                 .parsed<SourceResponse>()
 
             val videoReferer = response.headers.referer.toString()

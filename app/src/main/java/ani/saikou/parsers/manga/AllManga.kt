@@ -10,6 +10,7 @@ import ani.saikou.tryWithSuspend
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlin.collections.mapOf
 
 @OptIn(InternalSerializationApi::class)
 class AllManga : MangaApiParser() {
@@ -23,11 +24,14 @@ class AllManga : MangaApiParser() {
         return tryWithSuspend(post = false, snackbar = true) {
             if (query.isEmpty()) return@tryWithSuspend emptyList()
             val response =
-                client.get("$hostUrl/api/allmanga/manga/search?q=$query").parsed<SearchResponse>()
+                client.get(
+                    "$hostUrl/api/allmanga/manga/search?q=$query",
+                    headers = mapOf("x-api-key" to apiKey)
+                ).parsed<SearchResponse>()
 
             response.data.map {
                 ShowResponse(
-                    name = it.name ?: it.romaji ?: it.native ?:" Unknown title",
+                    name = it.name ?: it.romaji ?: it.native ?: " Unknown title",
                     link = it.id,
                     coverUrl = FileUrl(
                         url = it.posterImage as String,
@@ -44,8 +48,12 @@ class AllManga : MangaApiParser() {
     ): List<MangaChapter> {
         return tryWithSuspend(post = false, true) {
             if (mangaLink.isEmpty()) return@tryWithSuspend emptyList()
-            val response = client.get("$hostUrl/api/allmanga/manga/${mangaLink}")
-                .parsed<ChapterResponse>()
+            val response =
+                client.get(
+                    "$hostUrl/api/allmanga/manga/${mangaLink}",
+                    headers = mapOf("x-api-key" to apiKey)
+                )
+                    .parsed<ChapterResponse>()
 
             response.providerChapters.map {
                 MangaChapter(
@@ -67,7 +75,10 @@ class AllManga : MangaApiParser() {
 
         return tryWithSuspend(post = false, snackbar = true) {
             if (chapterLink.isEmpty()) return@tryWithSuspend emptyList()
-            val response = client.get("$hostUrl/api/allmanga/sources/$chapterLink")
+            val response = client.get(
+                "$hostUrl/api/allmanga/sources/$chapterLink",
+                headers = mapOf("x-api-key" to apiKey)
+            )
                 .parsed<ChapterImageResponse>()
 
             val referer = response.headers.referer
@@ -79,12 +90,12 @@ class AllManga : MangaApiParser() {
                 "Accept-Encoding" to "gzip, deflate, br, zstd",
                 "Referer" to referer,
             )
-          val urls=  response.data.map {
+            val urls = response.data.map {
                 MangaImage(
                     url = FileUrl(it.url, baseHeaders)
                 )
             }
-            imageUrlCache[chapterLink]= urls
+            imageUrlCache[chapterLink] = urls
             urls
         } ?: emptyList()
     }
