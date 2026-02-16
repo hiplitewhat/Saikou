@@ -128,28 +128,28 @@ class AnilistAnimeViewModel : ViewModel() {
             )?.results
         )
     }
-//     Swap recently updated for top rated
-//    private val updated: MutableLiveData<MutableList<Media>> =
-//        MutableLiveData<MutableList<Media>>(null)
-//
-//    fun getUpdated(): LiveData<MutableList<Media>> = updated
-//
-//    suspend fun loadUpdated() = updated.postValue(Anilist.query.recentlyUpdated())
 
-
-    private val topRated: MutableLiveData<MutableList<Media>> =
+    private val updated: MutableLiveData<MutableList<Media>> =
         MutableLiveData<MutableList<Media>>(null)
 
-    fun getTopRatedAnime(): LiveData<MutableList<Media>> = topRated
-    suspend fun loadTopRatedAnime() =
-        topRated.postValue(
-            Anilist.query.search(
-                type,
-                perPage = 20,
-                sort = Anilist.sortBy[0],
+    fun getUpdated(): LiveData<MutableList<Media>> = updated
 
-            )?.results
-        )
+    suspend fun loadUpdated() = updated.postValue(Anilist.query.recentlyUpdated())
+
+
+//    private val topRated: MutableLiveData<MutableList<Media>> =
+//        MutableLiveData<MutableList<Media>>(null)
+//
+//    fun getTopRatedAnime(): LiveData<MutableList<Media>> = topRated
+//    suspend fun loadTopRatedAnime() =
+//        topRated.postValue(
+//            Anilist.query.search(
+//                type,
+//                perPage = 20,
+//                sort = Anilist.sortBy[0],
+//
+//            )?.results
+//        )
 
     private val animePopular = MutableLiveData<SearchResults?>(null)
     fun getPopular(): LiveData<SearchResults?> = animePopular
