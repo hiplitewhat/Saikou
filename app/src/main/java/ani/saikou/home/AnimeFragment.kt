@@ -203,7 +203,7 @@ class AnimeFragment : Fragment() {
         })
         animePageAdapter.ready.observe(viewLifecycleOwner) { i ->
             if (i) {
-                model.getUpdated().observe(viewLifecycleOwner) {
+                model.getTopRatedAnime().observe(viewLifecycleOwner) {
                     if (it != null) {
                         animePageAdapter.updateRecent(MediaAdaptor(0, it, requireActivity()))
                     }
@@ -263,7 +263,7 @@ class AnimeFragment : Fragment() {
                         }
                         model.loaded = true
                         model.loadTrending(1)
-                        model.loadUpdated()
+                        model.loadTopRatedAnime()
                         model.loadPopular("ANIME", sort = Anilist.sortBy[1])
                     }
                     live.postValue(false)

@@ -52,6 +52,7 @@ class SearchActivity : AppCompatActivity() {
         if (!listOnly!!) listOnly = null
 
         val notSet = model.notSet
+
         if (model.notSet) {
             model.notSet = false
             model.searchResults = SearchResults(

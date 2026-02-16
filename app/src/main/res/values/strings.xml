@@ -37,11 +37,11 @@
     <string name="sort_by">Sort By</string>
     <string name="genre">Genre</string>
     <string name="top_score">Top Score</string>
-    <string name="updated">Recently Updated</string>
+    <string name="top_rated_anime">Top Rated</string>
     <string name="trending_anime">Trending Anime</string>
     <string name="popular_anime">Popular Anime</string>
     <string name="trending_manga">Trending Manga</string>
-    <string name="trending_novel">Trending Novel</string>
+    <string name="top_rated_manga">Top Rated</string>
     <string name="popular_manga">Popular Manga</string>
 
     <string name="username">Username</string>

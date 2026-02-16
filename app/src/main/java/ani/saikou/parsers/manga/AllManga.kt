@@ -5,7 +5,6 @@ import ani.saikou.client
 import ani.saikou.parsers.MangaApiParser
 import ani.saikou.parsers.MangaChapter
 import ani.saikou.parsers.MangaImage
-import ani.saikou.parsers.MangaParser
 import ani.saikou.parsers.ShowResponse
 import ani.saikou.tryWithSuspend
 import kotlinx.serialization.InternalSerializationApi
@@ -45,14 +44,13 @@ class AllManga : MangaApiParser() {
     ): List<MangaChapter> {
         return tryWithSuspend(post = false, true) {
             if (mangaLink.isEmpty()) return@tryWithSuspend emptyList()
-            val response = client.get("$hostUrl/api/allmanga/manga/${mangaLink}/chapters")
+            val response = client.get("$hostUrl/api/allmanga/manga/${mangaLink}")
                 .parsed<ChapterResponse>()
 
-            response.data.map {
+            response.providerChapters.map {
                 MangaChapter(
                     number = it.chapterNumber,
                     link = it.chapterId,
-                    title = it.title,
                 )
             }
         } ?: emptyList()
@@ -105,13 +103,11 @@ class AllManga : MangaApiParser() {
 
 
     @Serializable
-    private data class ChapterResponse(val data: List<ChapterItem>)
+    private data class ChapterResponse(val providerChapters: List<ChapterItem>)
 
     @Serializable
     private data class ChapterItem(
         val chapterId: String,
-        val title: String? = null,
-        val releaseDate: String? = null,
         val chapterNumber: String
     )
 
