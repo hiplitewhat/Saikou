@@ -58,12 +58,12 @@ object AppUpdater {
 
             val dontShow = loadData("dont_ask_for_update_$version") ?: false
 
-            /// additional check using build time comparison
             val isActualUpdate = if (BuildConfig.DEBUG) {
-                compareVersion(version) && (remoteTimestamp > BuildConfig.BUILD_TIME)
+                remoteTimestamp > BuildConfig.BUILD_TIME
             } else {
                 compareVersion(version)
             }
+
 
             if (isActualUpdate && !dontShow && !activity.isDestroyed) {
                 activity.runOnUiThread {
