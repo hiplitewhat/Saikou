@@ -233,7 +233,7 @@ class AnilistQueries {
                 }
             }
             val mal = async {
-                if (media.idMAL != null) {
+                if (media.idMAL != null  ) {
                     MalScraper.loadMedia(media)
                 }
             }

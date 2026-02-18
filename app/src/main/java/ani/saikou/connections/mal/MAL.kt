@@ -74,6 +74,11 @@ object MAL {
         } ?: false
     }
 
+
+    fun isLoggedIn(): Boolean {
+        val loggedIn = token != null && userid != null
+        return loggedIn
+    }
     fun removeSavedToken(context: Context) {
         token = null
         username = null

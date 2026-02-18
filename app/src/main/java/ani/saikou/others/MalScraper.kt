@@ -7,7 +7,7 @@ import ani.saikou.media.Media
 import ani.saikou.snackString
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.withTimeout
-
+import ani.saikou.connections.mal.MAL
 object MalScraper {
     private val headers = mapOf(
         "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36"
@@ -16,7 +16,7 @@ object MalScraper {
     suspend fun loadMedia(media: Media) {
         try {
             withTimeout(6000) {
-                if (media.anime != null) {
+                if (media.anime != null && MAL.isLoggedIn()) {
                     val res = client.get("https://myanimelist.net/anime/${media.idMAL}", headers).document
                     val a = res.select(".title-english").text()
                     media.nameMAL = if (a != "") a else res.select(".title-name").text()
