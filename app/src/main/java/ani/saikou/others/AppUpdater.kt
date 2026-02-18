@@ -57,8 +57,8 @@ object AppUpdater {
             logger("Git Version : $version | Build Time: ${BuildConfig.BUILD_TIME} | Remote Time: $remoteTimestamp")
 
             val dontShow = loadData("dont_ask_for_update_$version") ?: false
-
             val isActualUpdate = if (BuildConfig.DEBUG) {
+
                 remoteTimestamp > BuildConfig.BUILD_TIME
             } else {
                 compareVersion(version)
@@ -230,7 +230,9 @@ object AppUpdater {
         }
     }
 
-    val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US)
+    val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US).apply {
+        timeZone = TimeZone.getTimeZone("UTC")
+    }
 
     @SuppressLint("UnsafeOptInUsageError")
     @Serializable

@@ -13,6 +13,7 @@ def gitCommitHash = providers.exec {
     commandLine("git", "rev-parse", "--verify", "--short", "HEAD")
 }.standardOutput.asText.get().trim()
 
+def buildTime = project.findProperty('CUSTOM_BUILD_TIME') ?: System.currentTimeMillis().toString()
 
 android {
     compileSdk 36
@@ -24,8 +25,7 @@ android {
         versionCode ((System.currentTimeMillis() / 60000).toInteger())
         versionName "1.2.5"
         signingConfig signingConfigs.debug
-        buildConfigField "long", "BUILD_TIME", "System.currentTimeMillis()"
-
+        buildConfigField "long", "BUILD_TIME", "${buildTime}L"
     }
 
     buildTypes {
