@@ -28,25 +28,30 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 object AppUpdater {
+    private fun String.toTimestamp(): Long {
+        return try {
+            SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US).apply {
+                timeZone = TimeZone.getTimeZone("UTC")
+            }.parse(this)?.time ?: 0L
+        } catch (e: Exception) { 0L }
+    }
+
     suspend fun check(activity: FragmentActivity, post: Boolean = false) {
         if (post) snackString(currContext()?.getString(R.string.checking_for_update))
         val repo = activity.getString(R.string.repo)
 
         tryWithSuspend {
-
-            var remoteTimestamp: Long = 0
-
+            var remoteTime = 0L
             val (md, version) = if (BuildConfig.DEBUG) {
                 val res = client.get("https://api.github.com/repos/$repo/releases")
                     .parsed<JsonArray>().map {
                         Mapper.json.decodeFromJsonElement<GithubResponse>(it)
                     }
 
-                val r = res.filter { it.prerelease }.maxByOrNull {
-                    it.timeStamp()
-                } ?: throw Exception("No Pre Release Found")
+                val r = res.filter { it.prerelease }.maxByOrNull { it.createdAt.toTimestamp() }
+                    ?: throw Exception("No Pre Release Found")
 
-                remoteTimestamp = r.timeStamp()
+                remoteTime = r.createdAt.toTimestamp()
                 val v = r.tagName.substringAfter("v", "")
                 (r.body ?: "") to v.ifEmpty { throw Exception("Weird Version : ${r.tagName}") }
             } else {
@@ -54,16 +59,16 @@ object AppUpdater {
                 res to res.substringAfter("# ").substringBefore("\n")
             }
 
-            logger("Git Version : $version | Build Time: ${BuildConfig.BUILD_TIME} | Remote Time: $remoteTimestamp")
+            logger("Git Version : $version | Local: ${BuildConfig.VERSION_NAME}")
 
             val dontShow = loadData("dont_ask_for_update_$version") ?: false
+
             val isActualUpdate = if (BuildConfig.DEBUG) {
 
-                remoteTimestamp > BuildConfig.BUILD_TIME
+                remoteTime > BuildConfig.BUILD_TIME && BuildConfig.VERSION_NAME != version
             } else {
                 compareVersion(version)
             }
-
 
             if (isActualUpdate && !dontShow && !activity.isDestroyed) {
                 activity.runOnUiThread {
@@ -115,16 +120,15 @@ object AppUpdater {
     }
 
     private fun compareVersion(version: String): Boolean {
-
         if (BuildConfig.DEBUG)
-            return BuildConfig.VERSION_NAME != version
+            return true
         else {
             fun toDouble(list: List<String>): Double {
                 return list.mapIndexed { i: Int, s: String ->
                     when (i) {
-                        0 -> s.toDouble() * 100
-                        1 -> s.toDouble() * 10
-                        2 -> s.toDouble()
+                        0 -> (s.toDoubleOrNull() ?: 0.0) * 100
+                        1 -> (s.toDoubleOrNull() ?: 0.0) * 10
+                        2 -> s.toDoubleOrNull() ?: 0.0
                         else -> s.toDoubleOrNull() ?: 0.0
                     }
                 }.sum()
@@ -136,87 +140,53 @@ object AppUpdater {
         }
     }
 
-
-    //Blatantly kanged from https://github.com/LagradOst/CloudStream-3/blob/master/app/src/main/java/com/lagradost/cloudstream3/utils/InAppUpdater.kt
     private fun Activity.downloadUpdate(version: String, url: String): Boolean {
         toast(getString(R.string.downloading_update, version))
-
         val downloadManager = this.getSystemService<DownloadManager>()!!
 
         val request = DownloadManager.Request(Uri.parse(url))
             .setMimeType("application/vnd.android.package-archive")
             .setTitle("Downloading Saikou $version")
-            .setDestinationInExternalPublicDir(
-                Environment.DIRECTORY_DOWNLOADS,
-                "Saikou $version.apk"
-            )
+            .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "Saikou $version.apk")
             .setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
             .setAllowedOverRoaming(true)
             .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
 
-        val id = try {
-            downloadManager.enqueue(request)
-        } catch (e: Exception) {
-            logError(e)
-            -1L
-        }
-
+        val id = try { downloadManager.enqueue(request) } catch (e: Exception) { -1L }
         if (id == -1L) return false
-
 
         val receiver = object : BroadcastReceiver() {
             @SuppressLint("Range")
             override fun onReceive(context: Context?, intent: Intent?) {
                 try {
-                    val downloadId = intent?.getLongExtra(
-                        DownloadManager.EXTRA_DOWNLOAD_ID, id
-                    ) ?: id
-
+                    val downloadId = intent?.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, id) ?: id
                     val query = DownloadManager.Query().setFilterById(downloadId)
                     val c = downloadManager.query(query)
 
                     if (c != null && c.moveToFirst()) {
                         val status = c.getInt(c.getColumnIndex(DownloadManager.COLUMN_STATUS))
                         if (DownloadManager.STATUS_SUCCESSFUL == status) {
-                            val uriString =
-                                c.getString(c.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI))
-                            if (uriString != null) {
-                                openApk(this@downloadUpdate, Uri.parse(uriString))
-                            }
+                            val uriString = c.getString(c.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI))
+                            if (uriString != null) openApk(this@downloadUpdate, Uri.parse(uriString))
                         }
                         c.close()
                     }
-                } catch (e: Exception) {
-                    logError(e)
-                } finally {
-
-                    try {
-                        context?.unregisterReceiver(this)
-                    } catch (e: Exception) {
-                        logError(e)
-                    }
-                }
+                } catch (e: Exception) { logError(e) }
+                finally { try { context?.unregisterReceiver(this) } catch (e: Exception) { } }
             }
         }
 
         androidx.core.content.ContextCompat.registerReceiver(
-            this,
-            receiver,
-            IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE),
+            this, receiver, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE),
             androidx.core.content.ContextCompat.RECEIVER_EXPORTED
         )
-
         return true
     }
 
     fun openApk(context: Context, uri: Uri) {
         try {
             uri.path?.let {
-                val contentUri = FileProvider.getUriForFile(
-                    context,
-                    BuildConfig.APPLICATION_ID + ".provider",
-                    File(it)
-                )
+                val contentUri = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".provider", File(it))
                 val installIntent = Intent(Intent.ACTION_VIEW).apply {
                     addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                     addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
@@ -225,36 +195,19 @@ object AppUpdater {
                 }
                 context.startActivity(installIntent)
             }
-        } catch (e: Exception) {
-            logError(e)
-        }
-    }
-
-    val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US).apply {
-        timeZone = TimeZone.getTimeZone("UTC")
+        } catch (e: Exception) { logError(e) }
     }
 
     @SuppressLint("UnsafeOptInUsageError")
     @Serializable
     data class GithubResponse(
-        @SerialName("html_url")
-        val htmlUrl: String,
-        @SerialName("tag_name")
-        val tagName: String,
+        @SerialName("html_url") val htmlUrl: String,
+        @SerialName("tag_name") val tagName: String,
         val prerelease: Boolean,
-        @SerialName("created_at")
-        val createdAt: String,
+        @SerialName("created_at") val createdAt: String,
         val body: String? = null,
         val assets: List<Asset>? = null
     ) {
-        @Serializable
-        data class Asset(
-            @SerialName("browser_download_url")
-            val browserDownloadURL: String
-        )
-
-        fun timeStamp(): Long {
-            return dateFormat.parse(createdAt)!!.time
-        }
+        @Serializable data class Asset(@SerialName("browser_download_url") val browserDownloadURL: String)
     }
 }

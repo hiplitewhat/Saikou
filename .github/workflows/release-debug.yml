@@ -44,14 +44,13 @@ jobs:
 
       - name: Build Debug APK
         run: |
-          CURRENT_TIME=$(date +%s000)
           ./gradlew assembleDebug \
             -Pandroid.injected.signing.store.file=$GITHUB_WORKSPACE/signing-key.jks \
             -Pandroid.injected.signing.store.password=${{ secrets.PASSWORD }} \
             -Pandroid.injected.signing.key.alias=key0 \
             -Pandroid.injected.signing.key.password=${{ secrets.PASSWORD }} \
             -PAPI_KEY="${{ secrets.KEN_API_KEY }}" \
-            -PCUSTOM_BUILD_TIME=$CURRENT_TIME
+
         shell: bash
 
       - name: Create GitHub Release
