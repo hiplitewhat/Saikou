@@ -1,9 +1,9 @@
 
 ##  Version 1.2.5-beta
 
-###  other 
+###  Fixes
 
-* **Anime:** Enabled  Kaido.
+* **Updater:** Change url to match releases page.
 
 
 
